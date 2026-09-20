@@ -7,9 +7,48 @@ body {
   background-color: #f7f7fb;
 }
 
+header,
+main,
+footer {
+  max-width: 1108px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+header {
+  padding-top: 48px;
+  padding-bottom: 32px;
+}
+
+section {
+  margin-top: 56px;
+}
+
+footer {
+  margin-top: 32px;
+  padding-bottom: 32px;
+}
+
+img {
+  display: block;
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  margin: 20px auto;
+  border-radius: 16px;
+}
+
+nav {
+  display: flex;
+  gap: 24px;
+  margin-top: 24px;
+}
+
 nav a {
   color: #5b5878;
   font-weight: 700;
+  text-decoration: none;
 }
 
 h1 {
@@ -67,6 +106,20 @@ p {
   border-radius: 12px;
 }
 
+form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #d8b7c5;
+  border-radius: 10px;
+}
+
 button {
   padding: 12px 18px;
   border: 0;
@@ -77,6 +130,11 @@ button {
   transition:
     background-color 0.2s,
     transform 0.2s;
+}
+
+input,
+button {
+  font: inherit;
 }
 
 button:hover {
