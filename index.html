@@ -85,7 +85,7 @@
 
       <section id="subscribe" class="subscribe-card">
         <h2>면접 준비 팁 받아보기</h2>
-        <form>
+        <form id="subscribeForm">
           <label for="email">이메일</label>
           <input
             type="email"
@@ -93,8 +93,12 @@
             name="email"
             placeholder="name@example.com"
           />
-          <button type="submit">면접 팁 신청하기</button>
+          <button id="subscribeButton" type="submit">면접 팁 신청하기</button>
         </form>
+
+        <p id="subscribeMessage" aria-live="polite">
+          이메일을 입력한 뒤 신청해주세요.
+        </p>
       </section>
     </main>
 

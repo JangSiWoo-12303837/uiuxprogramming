@@ -204,4 +204,22 @@ button:active {
     /* 링크 글자 주변에도 누를 수 있는 여백 추가 */
     min-height: 48px;
   }
+  #subscribeMessage {
+    margin-top: 16px;
+    color: #555763;
+  }
+
+  #subscribeMessage.is-success {
+    color: #245c3a;
+    background-color: #e7f7ed;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 700;
+  }
+
+  #subscribeButton:disabled {
+    color: #ffffff;
+    background-color: #a8a8b2;
+    cursor: not-allowed;
+  }
 }
