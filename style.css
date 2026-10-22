@@ -111,7 +111,8 @@ p {
   background-color: #f4f3ff;
 }
 
-.tab-panel[hidden] {
+[hidden],
+.practice-actions[hidden] {
   display: none;
 }
 
@@ -132,8 +133,34 @@ textarea {
   resize: vertical;
 }
 
-#recordAnswer {
+#recordAnswer,
+#confirmAnswer {
   white-space: pre-wrap;
+}
+
+.practice-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+button.secondary-button {
+  color: #45405f;
+  background-color: #e9e8f2;
+}
+
+button.secondary-button:hover {
+  background-color: #dedbea;
+}
+
+#answerMessage.is-error {
+  color: #9d2439;
+  font-weight: 700;
+}
+
+textarea.has-error {
+  border-color: #9d2439;
 }
 
 p {
@@ -246,6 +273,10 @@ button:active {
   .tab-button {
     padding: 12px 4px;
     font-size: 14px;
+  }
+
+  .practice-actions {
+    flex-direction: column;
   }
 
   /* 이메일 입력창과 버튼을 한 열로 배치 */

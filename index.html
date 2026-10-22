@@ -14,10 +14,10 @@
   </head>
   <body>
     <!--
-  사용자: 이 서비스를 처음 사용하는 사람
-  목적: 서비스의 주요 내용과 이용 방법을 이해한다.
-  핵심 행동: 필요한 영역으로 이동하고 이메일로 소식을 신청한다.
-  정보 순서: 서비스 소개 → 주요 기능 → 이용 방법 → 소식 받기
+  사용자: 면접을 준비하는 취업 준비생
+  목적: 예상 질문에 대한 답변을 작성하고 기록한다.
+  핵심 행동: 질문 선택 → 답변 입력 → 내용 확인 → 기록 완료
+  정보 순서: 서비스 소개 → 면접 연습 → 이용 방법 → 소식 받기
   -->
 
     <header>
@@ -48,6 +48,7 @@
 
       <section id="features">
         <h2>면접 준비 기능</h2>
+        <p id="practiceProgress" aria-live="polite">1 / 3 · 질문 선택</p>
 
         <div class="tabs" aria-label="면접 준비 기능">
           <button type="button" class="tab-button is-active" data-panel="questionPanel" aria-pressed="true" aria-controls="questionPanel">예상 질문</button>
@@ -64,22 +65,47 @@
             <option value="본인의 장점과 단점은 무엇인가요?">장점과 단점</option>
           </select>
           <p id="questionMessage" aria-live="polite">선택한 질문: 자기소개를 해주세요.</p>
-          <p>질문을 고른 뒤 답변 연습 탭에서 답변을 작성해 보세요.</p>
+          <p>질문을 고른 뒤 답변 작성을 시작해 보세요.</p>
+          <button id="startButton" type="button">답변 작성 시작하기</button>
         </div>
 
         <div id="answerPanel" class="feature-card tab-panel" hidden>
-          <h3>답변 작성하기</h3>
-          <p id="practiceQuestion">자기소개를 해주세요.</p>
-          <label for="answerInput">나의 답변</label>
-          <textarea id="answerInput" rows="6" maxlength="500" placeholder="질문에 대한 답변을 작성해 보세요." aria-describedby="answerMessage"></textarea>
-          <p id="answerMessage" aria-live="polite">0 / 500자 · 답변을 입력해 주세요.</p>
-          <button id="saveButton" type="button" disabled>답변 기록하기</button>
+          <div id="answerEditor">
+            <h3>답변 작성하기</h3>
+            <p id="practiceQuestion">자기소개를 해주세요.</p>
+            <label for="answerInput">나의 답변</label>
+            <textarea id="answerInput" rows="6" maxlength="500" placeholder="질문에 대한 답변을 작성해 보세요." aria-describedby="answerMessage"></textarea>
+            <p id="answerMessage" aria-live="polite">0 / 500자 · 답변을 입력해 주세요.</p>
+            <div class="practice-actions">
+              <button id="backQuestionButton" class="secondary-button" type="button">질문 선택으로 돌아가기</button>
+              <button id="checkAnswerButton" type="button">작성한 답변 확인하기</button>
+            </div>
+          </div>
+
+          <div id="answerConfirm" hidden>
+            <h3 id="confirmTitle" tabindex="-1">기록 전 내용 확인</h3>
+            <h4>선택한 질문</h4>
+            <p id="confirmQuestion"></p>
+            <h4>작성한 답변</h4>
+            <p id="confirmAnswer"></p>
+            <p>내용을 확인한 뒤 기록해 주세요. 수정할 내용이 있으면 이전으로 돌아갈 수 있습니다.</p>
+            <div class="practice-actions">
+              <button id="backAnswerButton" class="secondary-button" type="button">답변 수정하기</button>
+              <button id="saveButton" type="button">답변 기록 완료하기</button>
+            </div>
+          </div>
         </div>
 
         <div id="recordPanel" class="feature-card tab-panel" hidden>
+          <p id="completeMessage" class="is-success" aria-live="polite" hidden>답변 기록이 완료되었습니다.</p>
           <h3>최근 연습 기록</h3>
           <p id="recordQuestion">아직 기록한 답변이 없습니다.</p>
           <p id="recordAnswer">답변 연습 탭에서 답변을 작성하고 기록해 보세요.</p>
+          <div id="recordActions" class="practice-actions" hidden>
+            <button id="editRecordButton" class="secondary-button" type="button">기록한 답변 수정하기</button>
+            <button id="restartButton" type="button">다시 연습하기</button>
+          </div>
+          <p>다시 연습하기를 누르면 질문, 입력한 답변과 기록이 초기화됩니다.</p>
           <p>가장 최근 답변 1개만 표시되며, 새로고침하면 기록이 사라집니다.</p>
         </div>
       </section>
@@ -90,7 +116,8 @@
         <ol>
           <li>연습하고 싶은 면접 질문을 선택합니다.</li>
           <li>답변 연습 탭에서 질문에 대한 답변을 작성합니다.</li>
-          <li>답변 기록을 확인하고 내용을 다듬어 다시 연습합니다.</li>
+          <li>작성한 내용을 확인하고 답변 기록을 완료합니다.</li>
+          <li>기록을 수정하거나 다시 연습하기로 새로운 연습을 시작합니다.</li>
         </ol>
       </section>
 
