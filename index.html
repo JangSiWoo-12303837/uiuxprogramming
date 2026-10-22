@@ -15,8 +15,8 @@
   <body>
     <!--
   사용자: 면접을 준비하는 취업 준비생
-  목적: 예상 질문에 대한 답변을 작성하고 기록한다.
-  핵심 행동: 질문 선택 → 답변 입력 → 내용 확인 → 기록 완료
+  목적: 예상 질문에 대한 답변을 작성하고 부족한 부분을 점검한다.
+  핵심 행동: 질문 선택 → 답변 입력 → 내용 확인 → 기록 완료 → 자기 점검
   정보 순서: 서비스 소개 → 면접 연습 → 이용 방법 → 소식 받기
   -->
 
@@ -37,7 +37,7 @@
         <h2>서비스 소개</h2>
         <h3>첫 면접도 차근차근</h3>
         <p>
-          예상 질문을 정리하고 답변을 연습하며, 자신 있게 면접을 준비합니다.
+          예상 질문에 답변을 작성하고, 부족한 부분을 점검하며 면접을 준비합니다.
         </p>
 
         <img
@@ -101,6 +101,37 @@
           <h3>최근 연습 기록</h3>
           <p id="recordQuestion">아직 기록한 답변이 없습니다.</p>
           <p id="recordAnswer">답변 연습 탭에서 답변을 작성하고 기록해 보세요.</p>
+          <button id="reviewButton" type="button">답변 점검하기</button>
+          <p id="reviewMessage" aria-live="polite">기록한 답변을 읽으며 스스로 점검해 보세요.</p>
+          <button id="writeAnswerButton" type="button" hidden>답변 작성하러 가기</button>
+
+          <div id="reviewBox" class="review-box" hidden>
+            <h4 id="reviewTitle" tabindex="-1">내 답변 점검</h4>
+            <p>위에 기록된 답변을 읽고 잘 지킨 항목만 체크하세요. 해당하는 항목이 없으면 체크하지 않고 결과를 볼 수 있습니다.</p>
+            <fieldset>
+              <legend>답변에서 잘 지킨 항목</legend>
+              <label><input class="review-check" type="checkbox" /> 질문에 맞는 내용을 답했다.</label>
+              <label><input class="review-check" type="checkbox" /> 구체적인 경험이나 이유를 넣었다.</label>
+              <label><input class="review-check" type="checkbox" /> 핵심 내용을 간결하게 전달했다.</label>
+            </fieldset>
+            <div class="practice-actions">
+              <button id="reviewResultButton" type="button">점검 결과 보기</button>
+              <button id="closeReviewButton" class="secondary-button" type="button">점검 닫기</button>
+            </div>
+
+            <div id="reviewResult" class="review-result" hidden>
+              <h4 id="reviewResultTitle" tabindex="-1">점검 결과</h4>
+              <p id="reviewScore"></p>
+              <p id="reviewFeedback"></p>
+              <ul id="reviewTips"></ul>
+              <p>직접 체크한 내용을 기준으로 한 결과입니다.</p>
+              <div class="practice-actions">
+                <button id="improveAnswerButton" type="button">답변 보완하러 가기</button>
+                <button id="restartReviewButton" class="secondary-button" type="button">체크 지우고 다시 점검</button>
+              </div>
+            </div>
+          </div>
+
           <div id="recordActions" class="practice-actions" hidden>
             <button id="editRecordButton" class="secondary-button" type="button">기록한 답변 수정하기</button>
             <button id="restartButton" type="button">다시 연습하기</button>
@@ -117,7 +148,8 @@
           <li>연습하고 싶은 면접 질문을 선택합니다.</li>
           <li>답변 연습 탭에서 질문에 대한 답변을 작성합니다.</li>
           <li>작성한 내용을 확인하고 답변 기록을 완료합니다.</li>
-          <li>기록을 수정하거나 다시 연습하기로 새로운 연습을 시작합니다.</li>
+          <li>답변 점검하기를 눌러 잘 지킨 항목을 체크하고 결과를 확인합니다.</li>
+          <li>보완 방법을 보고 답변을 고치거나 다시 연습하기로 새로 시작합니다.</li>
         </ol>
       </section>
 

@@ -14,6 +14,15 @@ const recordQuestion = document.querySelector("#recordQuestion");
 const recordAnswer = document.querySelector("#recordAnswer");
 const completeMessage = document.querySelector("#completeMessage");
 const recordActions = document.querySelector("#recordActions");
+const reviewMessage = document.querySelector("#reviewMessage");
+const writeAnswerButton = document.querySelector("#writeAnswerButton");
+const reviewBox = document.querySelector("#reviewBox");
+const reviewChecks = document.querySelectorAll(".review-check");
+const reviewResult = document.querySelector("#reviewResult");
+const reviewScore = document.querySelector("#reviewScore");
+const reviewFeedback = document.querySelector("#reviewFeedback");
+const reviewTips = document.querySelector("#reviewTips");
+let hasRecord = false;
 
 // 탭 이동과 진행 안내를 함께 바꾼다.
 function showTab(index) {
@@ -112,6 +121,11 @@ document.querySelector("#saveButton").addEventListener("click", function () {
   recordAnswer.textContent = confirmAnswer.textContent;
   completeMessage.hidden = false;
   recordActions.hidden = false;
+  hasRecord = true;
+  resetReview();
+  reviewBox.hidden = true;
+  writeAnswerButton.hidden = true;
+  reviewMessage.textContent = "답변을 기록했습니다. 답변 점검하기를 눌러 점검해 보세요.";
   showTab(2);
   document.querySelector("#editRecordButton").focus();
 });
@@ -140,8 +154,93 @@ document.querySelector("#restartButton").addEventListener("click", function () {
   recordAnswer.textContent = "답변 연습 탭에서 답변을 작성하고 기록해 보세요.";
   completeMessage.hidden = true;
   recordActions.hidden = true;
+  hasRecord = false;
+  resetReview();
+  reviewBox.hidden = true;
+  writeAnswerButton.hidden = true;
+  reviewMessage.textContent = "기록한 답변을 읽으며 스스로 점검해 보세요.";
   showTab(0);
   questionSelect.focus();
+});
+
+// 기록을 마친 뒤 답변을 스스로 점검한다.
+document.querySelector("#reviewButton").addEventListener("click", function () {
+  if (hasRecord === false) {
+    reviewMessage.textContent = "점검할 답변이 없습니다. 먼저 답변을 작성하고 기록해 주세요.";
+    writeAnswerButton.hidden = false;
+    return;
+  }
+  reviewBox.hidden = false;
+  reviewMessage.textContent = "기록한 답변을 읽고 잘 지킨 항목을 체크해 주세요.";
+  document.querySelector("#reviewTitle").focus();
+});
+
+writeAnswerButton.addEventListener("click", function () {
+  showEditor();
+});
+
+document.querySelector("#reviewResultButton").addEventListener("click", function () {
+  const tips = [
+    "질문에서 묻는 내용에 맞춰 첫 문장을 써 보세요.",
+    "직접 겪은 경험이나 그렇게 생각한 이유를 하나 넣어 보세요.",
+    "반복되는 표현을 줄이고 핵심 내용부터 말해 보세요."
+  ];
+  let count = 0;
+  reviewTips.textContent = "";
+
+  for (let i = 0; i < reviewChecks.length; i++) {
+    if (reviewChecks[i].checked) {
+      count += 1;
+    } else {
+      const tip = document.createElement("li");
+      tip.textContent = tips[i];
+      reviewTips.appendChild(tip);
+    }
+  }
+
+  reviewScore.textContent = "3개 중 " + count + "개 항목을 지켰습니다.";
+  if (count === 3) {
+    reviewFeedback.textContent = "모든 항목을 지켰네요. 작성한 답변을 소리 내어 연습해 보세요.";
+  } else if (count === 0) {
+    reviewFeedback.textContent = "체크한 항목이 없습니다. 아래 내용을 참고해서 한 가지씩 보완해 보세요.";
+  } else {
+    reviewFeedback.textContent = "잘 지킨 부분은 유지하고, 아래 내용을 보완해 보세요.";
+  }
+  reviewResult.hidden = false;
+  document.querySelector("#reviewResultTitle").focus();
+});
+
+for (let i = 0; i < reviewChecks.length; i++) {
+  reviewChecks[i].addEventListener("change", function () {
+    reviewResult.hidden = true;
+    reviewMessage.textContent = "체크한 내용이 바뀌었습니다. 점검 결과 보기를 다시 눌러 주세요.";
+  });
+}
+
+document.querySelector("#closeReviewButton").addEventListener("click", function () {
+  reviewBox.hidden = true;
+  reviewMessage.textContent = "점검을 닫았습니다. 다시 열면 체크한 내용이 유지됩니다.";
+  document.querySelector("#reviewButton").focus();
+});
+
+function resetReview() {
+  for (let i = 0; i < reviewChecks.length; i++) {
+    reviewChecks[i].checked = false;
+  }
+  reviewResult.hidden = true;
+  reviewScore.textContent = "";
+  reviewFeedback.textContent = "";
+  reviewTips.textContent = "";
+}
+
+document.querySelector("#restartReviewButton").addEventListener("click", function () {
+  resetReview();
+  reviewMessage.textContent = "체크와 결과를 지웠습니다. 기록한 답변을 다시 점검해 주세요.";
+  reviewChecks[0].focus();
+});
+
+document.querySelector("#improveAnswerButton").addEventListener("click", function () {
+  document.querySelector("#editRecordButton").click();
 });
 
 const subscribeForm = document.querySelector("#subscribeForm");
