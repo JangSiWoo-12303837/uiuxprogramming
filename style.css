@@ -1,9 +1,14 @@
+*,
+::before,
+::after {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   color: #292a31;
   font-family: "Noto Sans KR", Arial, sans-serif;
   line-height: 1.6;
-  margin: 0;
   background-color: #f7f7fb;
 }
 
@@ -75,17 +80,26 @@ p {
   line-height: 1.7;
 }
 
-.features-list {
-  list-style-type: none;
-  padding-left: 0;
-  margin: 0;
+.tabs {
   display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
 
-  /* 들어갈 수 있는 만큼 열을 만들고,
-  카드 너비는 최소 260px부터 남은 공간까지 사용*/
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+.tab-button {
+  color: #5b5878;
+  background-color: #e9e8f2;
+}
 
-  gap: 24px;
+.tab-button:hover {
+  color: #ffffff;
+}
+
+.tab-button.is-active {
+  color: #ffffff;
+  background-color: #635bff;
+  font-weight: 700;
 }
 
 .feature-card {
@@ -97,9 +111,47 @@ p {
   background-color: #f4f3ff;
 }
 
-::before,
-::after {
-  box-sizing: border-box;
+.tab-panel[hidden] {
+  display: none;
+}
+
+select,
+textarea {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid #deddea;
+  border-radius: 10px;
+  background-color: #ffffff;
+  color: #292a31;
+  font: inherit;
+}
+
+textarea {
+  resize: vertical;
+}
+
+#recordAnswer {
+  white-space: pre-wrap;
+}
+
+p {
+  overflow-wrap: anywhere;
+}
+
+.is-success {
+  color: #245c3a;
+  background-color: #e7f7ed;
+  padding: 12px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+button:disabled {
+  color: #ffffff;
+  background-color: #a8a8b2;
+  cursor: not-allowed;
 }
 
 .subscribe-card {
@@ -145,8 +197,10 @@ button:hover {
   background-color: #4b43db;
 }
 
-button:focus,
-input:focus {
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
   outline: 3px solid #b9b5ff;
   outline-offset: 2px;
 }
@@ -189,9 +243,9 @@ button:active {
     padding: 8px 0;
   }
 
-  /* Grid 카드 목록을 한 열로 고정 */
-  .features-list {
-    grid-template-columns: 1fr;
+  .tab-button {
+    padding: 12px 4px;
+    font-size: 14px;
   }
 
   /* 이메일 입력창과 버튼을 한 열로 배치 */
@@ -206,20 +260,5 @@ button:active {
   }
   #subscribeMessage {
     margin-top: 16px;
-    color: #555763;
-  }
-
-  #subscribeMessage.is-success {
-    color: #245c3a;
-    background-color: #e7f7ed;
-    padding: 12px;
-    border-radius: 10px;
-    font-weight: 700;
-  }
-
-  #subscribeButton:disabled {
-    color: #ffffff;
-    background-color: #a8a8b2;
-    cursor: not-allowed;
   }
 }
