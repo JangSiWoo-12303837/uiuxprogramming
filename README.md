@@ -3,8 +3,8 @@
 예상 질문을 고르고 답변을 작성해 보는 면접 준비 웹페이지다.
 로컬에서는 index.html을 브라우저에서 열면 된다.
 
-- 저장소: https://github.com/JangSiWoo-12303837/uiuxprogramming
-- 배포 주소: https://jangsiwoo-12303837.github.io/uiuxprogramming/
+1. GitHub Repository URL: https://github.com/JangSiWoo-12303837/uiuxprogramming
+2. Published Website URL: https://jangsiwoo-12303837.github.io/uiuxprogramming/
 
 ## 사용자와 목표
 
@@ -95,7 +95,7 @@
 
 ### 중간고사 테스트 결과
 
-로컬 Chromium 브라우저에서 확인했다.
+로컬과 배포된 페이지를 Chromium 브라우저에서 확인했다.
 
 | 확인한 경로 | 결과 |
 | --- | --- |
@@ -112,7 +112,7 @@
 | 다시 연습하기, 새로고침 | 답변 기록과 점검 내용이 모두 지워졌다. |
 | 1100px, 768px, 390px | 가로 넘침 없이 체크박스와 버튼을 조작할 수 있었다. |
 
-테스트 중 JavaScript 오류는 없었다. 배포 반영 후 같은 주소에서 다시 확인할 예정이다.
+배포된 페이지에서도 위 경로를 다시 확인했다. 기존 답변 기록과 이메일 신청도 정상 동작했고, 테스트 중 JavaScript 오류는 없었다.
 
 ## 참고
 
