@@ -229,7 +229,7 @@ button:disabled {
   border-radius: 12px;
 }
 
-form {
+#subscribeForm {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -320,7 +320,7 @@ button:active {
   }
 
   /* 이메일 입력창과 버튼을 한 열로 배치 */
-  form {
+  #subscribeForm {
     flex-direction: column;
     align-items: stretch;
   }
@@ -332,4 +332,80 @@ button:active {
   #subscribeMessage {
     margin-top: 16px;
   }
+}
+
+#practiceForm {
+  display: block;
+}
+
+.field-help {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.required {
+  color: #9d2439;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.field-error {
+  min-height: 24px;
+  margin: 6px 0 12px;
+  color: #9d2439;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.check-row input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: #635bff;
+}
+
+#targetFields {
+  min-width: 0;
+  margin: 16px 0;
+  padding: 16px;
+  border: 1px solid #deddea;
+  border-radius: 10px;
+}
+
+#targetRole {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  color: #292a31;
+  background-color: #fff;
+}
+
+#practiceForm .is-valid {
+  border-color: #16805d;
+}
+
+#practiceForm .has-error {
+  border-color: #9d2439;
+}
+
+#submitStatus {
+  min-height: 28px;
+}
+
+.is-error {
+  color: #9d2439;
+  font-weight: 700;
+}
+
+button:disabled:hover {
+  background-color: #a8a8b2;
 }
