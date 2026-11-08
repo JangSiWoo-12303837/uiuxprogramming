@@ -13,24 +13,20 @@ const confirmAnswer = document.querySelector("#confirmAnswer");
 const recordQuestion = document.querySelector("#recordQuestion");
 const recordAnswer = document.querySelector("#recordAnswer");
 const completeMessage = document.querySelector("#completeMessage");
-const recordActions = document.querySelector("#recordActions");
 const reviewMessage = document.querySelector("#reviewMessage");
-const writeAnswerButton = document.querySelector("#writeAnswerButton");
 const reviewBox = document.querySelector("#reviewBox");
 const reviewChecks = document.querySelectorAll(".review-check");
 const reviewResult = document.querySelector("#reviewResult");
 const reviewScore = document.querySelector("#reviewScore");
 const reviewFeedback = document.querySelector("#reviewFeedback");
 const reviewTips = document.querySelector("#reviewTips");
-let hasRecord = false;
 const practiceForm = document.querySelector("#practiceForm");
 const targetOption = document.querySelector("#targetOption");
 const targetFields = document.querySelector("#targetFields");
 const targetRole = document.querySelector("#targetRole");
 const submitStatus = document.querySelector("#submitStatus");
 const saveButton = document.querySelector("#saveButton");
-const storageKey = "interview-practice-latest-v1";
-let savedRecord = null;
+const storageKey = "interview-practice-records-v2";
 let isSaving = false;
 
 function syncTargetFields() {
@@ -96,35 +92,80 @@ targetRole.addEventListener("input", function () {
   submitStatus.textContent = "";
 });
 
-// 탭 이동과 진행 안내를 함께 바꾼다.
-function showTab(index) {
-  for (let i = 0; i < tabButtons.length; i++) {
-    tabButtons[i].classList.remove("is-active");
-    tabButtons[i].setAttribute("aria-pressed", "false");
-    tabPanels[i].hidden = true;
-  }
-  tabButtons[index].classList.add("is-active");
-  tabButtons[index].setAttribute("aria-pressed", "true");
-  tabPanels[index].hidden = false;
+const mainNav = document.querySelector("#mainNav");
+const navLinks = mainNav.querySelectorAll("a");
+const menuToggle = document.querySelector("#menuToggle");
+const mobileMenu = window.matchMedia("(max-width: 600px)");
+const recordList = document.querySelector("#recordList");
+const recordEmpty = document.querySelector("#recordEmpty");
+const recordDetail = document.querySelector("#recordDetail");
+const recordStatus = document.querySelector("#recordStatus");
+const filterButtons = document.querySelectorAll(".filter-button");
+let records = [];
+let selectedRecordId = null;
+let editingRecordId = null;
+let currentFilter = "all";
 
-  if (index === 0) {
-    practiceProgress.textContent = "1 / 3 · 질문 선택";
-  } else if (index === 1 && answerConfirm.hidden) {
-    practiceProgress.textContent = "2 / 3 · 답변 입력";
-  } else if (index === 1) {
-    practiceProgress.textContent = "3 / 3 · 내용 확인";
-  } else if (!completeMessage.hidden) {
-    practiceProgress.textContent = "기록 완료";
-  } else {
-    practiceProgress.textContent = "연습 기록";
-  }
+function setMenuOpen(open) {
+  mainNav.classList.toggle("is-open", open);
+  menuToggle.textContent = open ? "메뉴 닫기" : "메뉴 열기";
+  menuToggle.setAttribute("aria-expanded", String(open));
 }
 
-for (let i = 0; i < tabButtons.length; i++) {
-  tabButtons[i].addEventListener("click", function () {
-    showTab(i);
+menuToggle.addEventListener("click", function () {
+  setMenuOpen(menuToggle.getAttribute("aria-expanded") !== "true");
+});
+mobileMenu.addEventListener("change", function () { setMenuOpen(false); });
+mainNav.addEventListener("keydown", function (event) {
+  if (event.key === "Escape" && mobileMenu.matches) {
+    setMenuOpen(false);
+    menuToggle.focus();
+  }
+});
+navLinks.forEach(function (link) {
+  link.addEventListener("click", function () { setMenuOpen(false); });
+});
+
+function setPracticePanel(index) {
+  tabButtons.forEach(function (button, i) {
+    button.classList.toggle("is-active", i === index);
+    button.setAttribute("aria-pressed", String(i === index));
+    tabPanels[i].hidden = i !== index;
   });
+  practiceProgress.textContent = index === 0 ? "1 / 3 · 질문 선택"
+    : answerConfirm.hidden ? "2 / 3 · 답변 입력" : "3 / 3 · 내용 확인";
 }
+
+// 주소를 기준으로 메뉴를 표시하므로 새로고침과 뒤로 가기도 같은 경로를 쓴다.
+function updateLocation() {
+  const hash = location.hash || "#about";
+  const menuHash = hash === "#answerPanel" ? "#features" : hash;
+  navLinks.forEach(function (link) {
+    const current = link.getAttribute("href") === menuHash;
+    link.classList.toggle("is-current", current);
+    if (current) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  });
+  const currentLink = mainNav.querySelector("[aria-current]");
+  document.title = "면접 준비 서비스 | " + (currentLink ? currentLink.textContent : "면접 연습");
+  if (hash === "#features") setPracticePanel(0);
+  if (hash === "#answerPanel") setPracticePanel(1);
+  setMenuOpen(false);
+}
+window.addEventListener("hashchange", updateLocation);
+
+function moveTo(hash) {
+  if (location.hash !== hash) location.hash = hash;
+  updateLocation();
+}
+
+function showTab(index) {
+  setPracticePanel(index);
+  moveTo(index === 0 ? "#features" : "#answerPanel");
+}
+tabButtons.forEach(function (button, index) {
+  button.addEventListener("click", function () { showTab(index); });
+});
 
 function updateAnswer() {
   if (answerInput.getAttribute("aria-invalid") === "true") {
@@ -152,22 +193,19 @@ questionSelect.addEventListener("change", function () {
   clearFieldError(answerInput, "answerError");
   answerEditor.hidden = false;
   answerConfirm.hidden = true;
-  confirmQuestion.textContent = "";
-  confirmAnswer.textContent = "";
   document.querySelector("#checkAnswerButton").disabled = false;
   updateAnswer();
 });
-
 answerInput.addEventListener("input", updateAnswer);
-
 document.querySelector("#startButton").addEventListener("click", function () {
+  editingRecordId = null;
   showEditor();
 });
-
 document.querySelector("#backQuestionButton").addEventListener("click", function () {
   showTab(0);
   questionSelect.focus();
 });
+document.querySelector("#backAnswerButton").addEventListener("click", showEditor);
 
 function showConfirmation() {
   document.querySelector("#checkAnswerButton").disabled = true;
@@ -180,44 +218,114 @@ function showConfirmation() {
   document.querySelector("#confirmTitle").focus();
 }
 
-document.querySelector("#backAnswerButton").addEventListener("click", function () {
-  showEditor();
+function saveRecords(nextRecords) {
+  localStorage.setItem(storageKey, JSON.stringify(nextRecords));
+  records = nextRecords;
+}
+
+function getVisibleRecords() {
+  return records.filter(function (record) {
+    if (currentFilter === "pending") return !record.reviewed;
+    if (currentFilter === "reviewed") return record.reviewed;
+    return true;
+  });
+}
+
+function renderRecords() {
+  const visible = getVisibleRecords();
+  const names = { all: "전체", pending: "점검 전", reviewed: "점검 완료" };
+  document.querySelector("#recordCount").textContent = names[currentFilter] + " · " + visible.length + "개";
+  filterButtons.forEach(function (button) {
+    const selected = button.dataset.filter === currentFilter;
+    button.classList.toggle("is-active", selected);
+    button.setAttribute("aria-pressed", String(selected));
+  });
+  recordEmpty.hidden = visible.length !== 0;
+  recordList.hidden = visible.length === 0;
+  const noRecords = records.length === 0;
+  recordEmpty.querySelector("h3").textContent = noRecords ? "아직 기록한 답변이 없습니다."
+    : currentFilter === "pending" ? "점검을 기다리는 답변이 없습니다." : "점검을 마친 답변이 없습니다.";
+  recordEmpty.querySelector("p").textContent = noRecords ? "면접 질문을 고르고 첫 답변을 작성해 보세요."
+    : currentFilter === "pending" ? "전체에서 기록을 확인하거나 새 답변을 연습해 보세요."
+    : "전체 또는 점검 전에서 답변을 열고 자기 점검을 해보세요.";
+  recordEmpty.querySelector("a").hidden = !noRecords;
+  recordList.replaceChildren();
+  visible.forEach(function (record) {
+    const item = document.createElement("li");
+    item.className = "record-card";
+    const state = document.createElement("p");
+    state.className = "record-state";
+    state.textContent = record.reviewed ? "점검 완료" : "점검 전";
+    const title = document.createElement("h3");
+    title.textContent = record.question;
+    const context = document.createElement("p");
+    context.textContent = record.targeted ? record.targetRole : "일반 면접 연습";
+    const preview = document.createElement("p");
+    preview.textContent = record.answer.length > 80 ? record.answer.slice(0, 80) + "…" : record.answer;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.textContent = "답변 보기";
+    button.setAttribute("aria-label", record.question + " 답변 보기");
+    button.addEventListener("click", function () {
+      selectRecord(record.id);
+      moveTo("#records");
+      document.querySelector("#recordDetailTitle").focus();
+    });
+    item.append(state, title, context, preview, button);
+    recordList.appendChild(item);
+  });
+}
+
+filterButtons.forEach(function (button) {
+  button.addEventListener("click", function () {
+    currentFilter = button.dataset.filter;
+    moveTo("#records");
+    renderRecords();
+    recordStatus.textContent = "";
+    if (!getVisibleRecords().some(record => record.id === selectedRecordId)) {
+      recordDetail.hidden = true;
+      selectedRecordId = null;
+    }
+  });
 });
 
-function renderRecord(record) {
-  completeMessage.textContent = "답변 기록이 완료되었습니다. 이 브라우저에서 다시 확인할 수 있습니다.";
+function selectRecord(id) {
+  const record = records.find(record => record.id === id);
+  if (!record) return;
+  selectedRecordId = id;
+  recordDetail.hidden = false;
+  completeMessage.hidden = true;
   recordQuestion.textContent = record.question;
   recordAnswer.textContent = record.answer;
   document.querySelector("#recordContext").textContent = record.targeted ? "지원 직무: " + record.targetRole : "일반 면접 연습";
-  completeMessage.hidden = false;
-  recordActions.hidden = false;
-  hasRecord = true;
-  resetReview();
+  reviewChecks.forEach(function (check, index) { check.checked = record.checks[index]; });
+  reviewResult.hidden = true;
   reviewBox.hidden = true;
-  writeAnswerButton.hidden = true;
-  reviewMessage.textContent = "답변을 기록했습니다. 답변 점검하기를 눌러 점검해 보세요.";
+  reviewMessage.textContent = record.reviewed ? "점검을 마친 답변입니다. 답변 점검하기를 눌러 결과를 다시 볼 수 있습니다."
+    : "기록한 답변을 읽으며 스스로 점검해 보세요.";
 }
 
-// 확인과 저장 모두 submit에서 처리한다. 저장 중 Enter와 연속 클릭도 차단한다.
 practiceForm.addEventListener("submit", async function (event) {
   event.preventDefault();
-  if (isSaving) return;
-  if (!validatePractice()) return;
+  if (isSaving || !validatePractice()) return;
   if (answerConfirm.hidden || event.submitter !== saveButton) {
     showConfirmation();
     return;
   }
   const data = new FormData(practiceForm);
   const record = {
+    id: editingRecordId || crypto.randomUUID(),
     question: String(data.get("question")),
     answer: String(data.get("answer")).trim(),
-    targeted: data.get("targeted") === "yes"
+    targeted: data.get("targeted") === "yes",
+    checks: [false, false, false],
+    reviewed: false
   };
-  // 비활성화한 직무 입력은 FormData와 저장 객체에서 모두 제외한다.
   if (record.targeted) record.targetRole = String(data.get("targetRole")).trim();
+  const nextRecords = editingRecordId ? records.map(item => item.id === editingRecordId ? record : item) : [record, ...records];
   isSaving = true;
   practiceForm.setAttribute("aria-busy", "true");
-  const controls = [...document.querySelectorAll("#features button, #practiceForm input, #practiceForm select, #practiceForm textarea")];
+  const controls = [...document.querySelectorAll("#features button, #practiceForm input, #practiceForm select, #practiceForm textarea, #records button, #records input")];
   const previousDisabled = controls.map(control => control.disabled);
   controls.forEach(control => { control.disabled = true; });
   saveButton.textContent = "기록 저장 중…";
@@ -226,14 +334,18 @@ practiceForm.addEventListener("submit", async function (event) {
   let succeeded = false;
   try {
     await new Promise(resolve => window.setTimeout(resolve, 700));
-    if (new URLSearchParams(location.search).get("save-error") === "1") {
-      throw new Error("저장 실패 확인용");
-    }
-    localStorage.setItem(storageKey, JSON.stringify(record));
-    savedRecord = record;
-    renderRecord(record);
-    submitStatus.textContent = "답변 기록이 완료되었습니다.";
-    showTab(2);
+    if (new URLSearchParams(location.search).get("save-error") === "1") throw new Error("저장 실패 확인용");
+    saveRecords(nextRecords);
+    editingRecordId = record.id;
+    currentFilter = "all";
+    renderRecords();
+    selectRecord(record.id);
+    completeMessage.textContent = "답변 기록이 완료되었습니다. 답변을 읽고 자기 점검을 해보세요.";
+    completeMessage.hidden = false;
+    submitStatus.textContent = "";
+    recordStatus.classList.remove("is-error");
+    recordStatus.textContent = "답변을 저장했습니다. 전체 " + records.length + "개 기록이 있습니다.";
+    moveTo("#records");
     succeeded = true;
   } catch {
     submitStatus.classList.add("is-error");
@@ -241,19 +353,22 @@ practiceForm.addEventListener("submit", async function (event) {
   } finally {
     isSaving = false;
     practiceForm.setAttribute("aria-busy", "false");
-    controls.forEach((control, index) => { control.disabled = previousDisabled[index]; });
+    controls.forEach((control, index) => { if (control.isConnected) control.disabled = previousDisabled[index]; });
     saveButton.textContent = "답변 기록 완료하기";
-    if (succeeded) document.querySelector("#editRecordButton").focus();
+    if (succeeded) document.querySelector("#recordDetailTitle").focus();
   }
 });
 
 document.querySelector("#editRecordButton").addEventListener("click", function () {
-  questionSelect.value = recordQuestion.textContent;
-  questionMessage.textContent = "선택한 질문: " + questionSelect.value;
-  practiceQuestion.textContent = questionSelect.value;
-  answerInput.value = recordAnswer.textContent;
-  targetOption.checked = savedRecord.targeted;
-  targetRole.value = savedRecord.targetRole || "";
+  const record = records.find(record => record.id === selectedRecordId);
+  if (!record) return;
+  editingRecordId = record.id;
+  questionSelect.value = record.question;
+  questionMessage.textContent = "선택한 질문: " + record.question;
+  practiceQuestion.textContent = record.question;
+  answerInput.value = record.answer;
+  targetOption.checked = record.targeted;
+  targetRole.value = record.targetRole || "";
   clearFieldError(answerInput, "answerError");
   clearFieldError(targetRole, "roleError");
   syncTargetFields();
@@ -261,138 +376,122 @@ document.querySelector("#editRecordButton").addEventListener("click", function (
   showEditor();
 });
 
-// 다시 시작하면 연습 내용과 기록을 모두 지운다.
+// 새 답변은 입력만 비운다. 이미 저장한 연습 기록은 보관한다.
 document.querySelector("#restartButton").addEventListener("click", function () {
-  try {
-    localStorage.removeItem(storageKey);
-  } catch {
-    reviewMessage.textContent = "저장 기록을 지우지 못했습니다. 브라우저 저장 설정을 확인한 뒤 다시 시도해 주세요.";
-    return;
-  }
+  editingRecordId = null;
   practiceForm.reset();
   clearFieldError(answerInput, "answerError");
   clearFieldError(targetRole, "roleError");
   syncTargetFields();
-  savedRecord = null;
-  document.querySelector("#confirmContext").textContent = "";
-  document.querySelector("#recordContext").textContent = "";
-  submitStatus.classList.remove("is-error");
-  questionSelect.selectedIndex = 0;
+  updateAnswer();
   questionMessage.textContent = "선택한 질문: " + questionSelect.value;
   practiceQuestion.textContent = questionSelect.value;
-  answerInput.value = "";
-  updateAnswer();
+  confirmQuestion.textContent = "";
+  confirmAnswer.textContent = "";
+  document.querySelector("#confirmContext").textContent = "";
+  submitStatus.classList.remove("is-error");
   answerEditor.hidden = false;
   answerConfirm.hidden = true;
   document.querySelector("#checkAnswerButton").disabled = false;
-  confirmQuestion.textContent = "";
-  confirmAnswer.textContent = "";
-  recordQuestion.textContent = "아직 기록한 답변이 없습니다.";
-  recordAnswer.textContent = "답변 연습 탭에서 답변을 작성하고 기록해 보세요.";
-  completeMessage.hidden = true;
-  recordActions.hidden = true;
-  hasRecord = false;
-  resetReview();
-  reviewBox.hidden = true;
-  writeAnswerButton.hidden = true;
-  reviewMessage.textContent = "기록한 답변을 읽으며 스스로 점검해 보세요.";
   showTab(0);
   questionSelect.focus();
 });
 
-syncTargetFields();
-// 손상되었거나 이전 형식의 저장값은 화면에 복원하지 않는다.
-try {
-  const record = JSON.parse(localStorage.getItem(storageKey));
-  const questions = [...questionSelect.options].map(option => option.value);
-  if (record && questions.includes(record.question) && typeof record.answer === "string" && record.answer.trim().length >= 20 && record.answer.length <= 500 && typeof record.targeted === "boolean" && (!record.targeted || (typeof record.targetRole === "string" && record.targetRole.trim().length >= 2 && record.targetRole.length <= 40))) {
-    savedRecord = record;
-    renderRecord(record);
-    completeMessage.textContent = "이 브라우저에 저장한 최근 답변을 불러왔습니다.";
-  }
-} catch {
-  // 저장 접근이 차단되어도 작성은 가능하며 제출 시 실패를 안내한다.
-}
-
-// 기록을 마친 뒤 답변을 스스로 점검한다.
-document.querySelector("#reviewButton").addEventListener("click", function () {
-  if (hasRecord === false) {
-    reviewMessage.textContent = "점검할 답변이 없습니다. 먼저 답변을 작성하고 기록해 주세요.";
-    writeAnswerButton.hidden = false;
-    return;
-  }
-  reviewBox.hidden = false;
-  reviewMessage.textContent = "기록한 답변을 읽고 잘 지킨 항목을 체크해 주세요.";
-  document.querySelector("#reviewTitle").focus();
-});
-
-writeAnswerButton.addEventListener("click", function () {
-  showEditor();
-});
-
-document.querySelector("#reviewResultButton").addEventListener("click", function () {
-  const tips = [
-    "질문에서 묻는 내용에 맞춰 첫 문장을 써 보세요.",
-    "직접 겪은 경험이나 그렇게 생각한 이유를 하나 넣어 보세요.",
-    "반복되는 표현을 줄이고 핵심 내용부터 말해 보세요."
-  ];
-  let count = 0;
-  reviewTips.textContent = "";
-
-  for (let i = 0; i < reviewChecks.length; i++) {
-    if (reviewChecks[i].checked) {
-      count += 1;
-    } else {
+function showReviewResult() {
+  const tips = ["질문에서 묻는 내용에 맞춰 첫 문장을 써 보세요.", "직접 겪은 경험이나 그렇게 생각한 이유를 하나 넣어 보세요.", "반복되는 표현을 줄이고 핵심 내용부터 말해 보세요."];
+  const count = [...reviewChecks].filter(check => check.checked).length;
+  reviewTips.replaceChildren();
+  reviewChecks.forEach(function (check, index) {
+    if (!check.checked) {
       const tip = document.createElement("li");
-      tip.textContent = tips[i];
+      tip.textContent = tips[index];
       reviewTips.appendChild(tip);
     }
-  }
-
+  });
   reviewScore.textContent = "3개 중 " + count + "개 항목을 지켰습니다.";
-  if (count === 3) {
-    reviewFeedback.textContent = "모든 항목을 지켰네요. 작성한 답변을 소리 내어 연습해 보세요.";
-  } else if (count === 0) {
-    reviewFeedback.textContent = "체크한 항목이 없습니다. 아래 내용을 참고해서 한 가지씩 보완해 보세요.";
-  } else {
-    reviewFeedback.textContent = "잘 지킨 부분은 유지하고, 아래 내용을 보완해 보세요.";
-  }
+  reviewFeedback.textContent = count === 3 ? "모든 항목을 지켰네요. 작성한 답변을 소리 내어 연습해 보세요."
+    : count === 0 ? "체크한 항목이 없습니다. 아래 내용을 참고해서 한 가지씩 보완해 보세요."
+    : "잘 지킨 부분은 유지하고, 아래 내용을 보완해 보세요.";
   reviewResult.hidden = false;
+}
+
+function saveReview(reviewed) {
+  const record = records.find(record => record.id === selectedRecordId);
+  if (!record) return false;
+  const updated = { ...record, reviewed, checks: [...reviewChecks].map(check => check.checked) };
+  try {
+    saveRecords(records.map(item => item.id === record.id ? updated : item));
+    renderRecords();
+    reviewMessage.classList.remove("is-error");
+    return true;
+  } catch {
+    reviewChecks.forEach((check, index) => { check.checked = record.checks[index]; });
+    reviewMessage.classList.add("is-error");
+    reviewMessage.textContent = "점검 내용을 저장하지 못했습니다. 브라우저 저장 설정을 확인한 뒤 다시 시도해 주세요.";
+    return false;
+  }
+}
+
+document.querySelector("#reviewButton").addEventListener("click", function () {
+  reviewBox.hidden = false;
+  const record = records.find(record => record.id === selectedRecordId);
+  if (record && record.reviewed) showReviewResult();
+  document.querySelector("#reviewTitle").focus();
+});
+document.querySelector("#reviewResultButton").addEventListener("click", function () {
+  if (!saveReview(true)) return;
+  showReviewResult();
+  reviewMessage.textContent = "점검 결과를 저장했습니다. 이 답변은 점검 완료로 표시됩니다.";
   document.querySelector("#reviewResultTitle").focus();
 });
-
-for (let i = 0; i < reviewChecks.length; i++) {
-  reviewChecks[i].addEventListener("change", function () {
+reviewChecks.forEach(function (check) {
+  check.addEventListener("change", function () {
+    if (!saveReview(false)) return;
     reviewResult.hidden = true;
     reviewMessage.textContent = "체크한 내용이 바뀌었습니다. 점검 결과 보기를 다시 눌러 주세요.";
   });
-}
-
+});
 document.querySelector("#closeReviewButton").addEventListener("click", function () {
   reviewBox.hidden = true;
-  reviewMessage.textContent = "점검을 닫았습니다. 다시 열면 체크한 내용이 유지됩니다.";
   document.querySelector("#reviewButton").focus();
 });
-
-function resetReview() {
-  for (let i = 0; i < reviewChecks.length; i++) {
-    reviewChecks[i].checked = false;
-  }
-  reviewResult.hidden = true;
-  reviewScore.textContent = "";
-  reviewFeedback.textContent = "";
-  reviewTips.textContent = "";
-}
-
 document.querySelector("#restartReviewButton").addEventListener("click", function () {
-  resetReview();
+  reviewChecks.forEach(check => { check.checked = false; });
+  if (!saveReview(false)) return;
+  reviewResult.hidden = true;
   reviewMessage.textContent = "체크와 결과를 지웠습니다. 기록한 답변을 다시 점검해 주세요.";
   reviewChecks[0].focus();
 });
-
 document.querySelector("#improveAnswerButton").addEventListener("click", function () {
   document.querySelector("#editRecordButton").click();
 });
+
+function isValidRecord(record) {
+  return record && [...questionSelect.options].some(option => option.value === record.question)
+    && typeof record.answer === "string" && record.answer.trim().length >= 20 && record.answer.length <= 500
+    && typeof record.targeted === "boolean"
+    && (!record.targeted || (typeof record.targetRole === "string" && record.targetRole.trim().length >= 2 && record.targetRole.length <= 40));
+}
+
+// 9주차에 저장한 최근 답변도 목록의 첫 기록으로 불러온다.
+try {
+  const stored = localStorage.getItem(storageKey);
+  const data = stored === null ? JSON.parse(localStorage.getItem("interview-practice-latest-v1")) : JSON.parse(stored);
+  const items = Array.isArray(data) ? data : data ? [data] : [];
+  records = items.filter(isValidRecord).map(function (record) {
+    return {
+      ...record,
+      id: typeof record.id === "string" ? record.id : crypto.randomUUID(),
+      checks: Array.isArray(record.checks) && record.checks.length === 3 ? record.checks.map(Boolean) : [false, false, false],
+      reviewed: record.reviewed === true
+    };
+  });
+} catch {
+  recordStatus.textContent = "저장 기록을 불러오지 못했습니다. 브라우저 저장 설정을 확인해 주세요.";
+}
+syncTargetFields();
+renderRecords();
+updateLocation();
 
 const subscribeForm = document.querySelector("#subscribeForm");
 const emailInput = document.querySelector("#email");

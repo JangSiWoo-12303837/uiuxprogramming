@@ -44,17 +44,41 @@ img {
   border-radius: 16px;
 }
 
-nav {
-  display: flex;
-  gap: 24px;
+#mainNav {
   margin-top: 24px;
 }
 
-nav a {
+#mainNav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#mainNav a {
+  display: block;
+  padding: 10px 14px;
+  border-radius: 10px;
   color: #5b5878;
   font-weight: 700;
   text-decoration: none;
 }
+
+#mainNav a:hover {
+  background-color: #e9e8f2;
+}
+
+#mainNav a.is-current {
+  color: #4338ca;
+  background-color: #e9e8ff;
+  box-shadow: inset 0 -3px 0 #635bff;
+}
+
+#menuToggle { display: none; }
+
+section, #answerPanel { scroll-margin-top: 20px; }
 
 h1 {
   font-size: 44px;
@@ -101,6 +125,56 @@ p {
   background-color: #635bff;
   font-weight: 700;
 }
+
+.record-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 4px;
+  border-radius: 10px;
+  background-color: #e9e8f2;
+  color: #45405f;
+  text-align: center;
+  text-decoration: none;
+}
+
+.record-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-button {
+  color: #45405f;
+  background-color: #e9e8f2;
+}
+
+.filter-button.is-active {
+  color: white;
+  background-color: #635bff;
+}
+
+.record-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.record-card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid #deddea;
+  border-radius: 12px;
+  background-color: #fff;
+  overflow-wrap: anywhere;
+}
+
+.record-card h3 { margin-top: 8px; }
+.record-state { color: #4338ca; font-size: 14px; font-weight: 700; }
+#recordDetail { margin-top: 24px; }
+#recordStatus:empty { display: none; }
 
 .feature-card {
   min-width: 0;
@@ -264,6 +338,7 @@ button:hover {
   background-color: #4b43db;
 }
 
+a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
@@ -299,18 +374,7 @@ button:active {
     font-size: 28px;
   }
 
-  /* 가로 메뉴를 위에서 아래로 배치 */
-  nav {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-
-  nav a {
-    padding: 8px 0;
-  }
-
-  .tab-button {
+  .tab-button, .record-link {
     padding: 12px 4px;
     font-size: 14px;
   }
@@ -332,6 +396,15 @@ button:active {
   #subscribeMessage {
     margin-top: 16px;
   }
+}
+
+@media (max-width: 600px) {
+  #menuToggle { display: inline-flex; }
+  #mainNav { display: none; margin-top: 12px; }
+  #mainNav.is-open { display: block; }
+  #mainNav ul { flex-direction: column; gap: 6px; }
+  #mainNav a { min-height: 48px; }
+  .record-list { grid-template-columns: 1fr; }
 }
 
 #practiceForm {
